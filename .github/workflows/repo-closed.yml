@@ -1,23 +1,22 @@
-name: Repo CLOSED
-
-on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
-  push:
-    branches:
-      - main
-
+name: Build arm64 c2patool
+on: [workflow_dispatch] # 允许手动触发
 jobs:
-  tests:
-    name: c2patool moved
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Please file your PR in contentauth/c2pa-rs
-        run: |
-          echo "This repo is no longer in use. Please file your PR in contentauth/c2pa-rs instead."
-          exit 1
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+      - name: Install cross
+        run: cargo install cross
+      - name: Build with cross
+        run: cross build --target aarch64-unknown-linux-gnu --release
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: c2patool-linux-arm64
+          path: target/aarch64-unknown-linux-gnu/release/c2patool
